@@ -1,59 +1,79 @@
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter, MaxNLocator
 import numpy as np
 
-#Use global variables for list of hours and sales so accessable in both functions
+#declare these lists globally to use in both functions
 hours = []
 sales = []
 
-
 """
-This function creates the scatter plot. It will open the file, pull the data, 
-split it into two lists, then create a scatter plot with those two lists.
-The plot is done using MatPlotLib.
+Creates the scatter plot, and plots the regression and the quadratic fit to it
 """
 def create_scatter():
     
     data = open("proj1data.txt", "r")
     data_parsed = [line.strip().split(",") for line in data]
-
-    """
-    reverse iterate because deleting entries while iterating over list
-    can cause issues.
-    """
-
-    #Remove all NaN entries from the list.
+    
+    #reverse iterate because deleting entries while iterating forward can be problematic
     for entry in reversed(data_parsed):
         if not entry[1].isdigit():
             data_parsed.remove(entry)
 
-    #Tell the program to use the global variables.
+    #used to tell function to use global declaration
     global hours, sales
     hours = [int(entry[0]) for entry in data_parsed]
     sales = [int(entry[1]) for entry in data_parsed]
 
-    #Get the slope and intercept for the regression line.
+    #example outlier
+    hours.append(745)
+    sales.append(20000)
+
+    #info for regression fit
     regression_info = create_regression()
-                      
-    #Create the scatter plot.
-    colors = (0,0,0)
+
+    #creates the scatter plot, adds labels
     plt.scatter(hours, sales, s=np.pi, alpha=0.5)
     plt.title('CS 678 Proj 1')
     plt.xlabel('Hours')
     plt.ylabel('Sales')
+    ax = plt.gca()
+    ax.text(0.41, 0.91,
+            "Regression line: y = " + str(round(regression_info[0], 2)) + "x + " + str(round(regression_info[1], 2)),
+            fontsize=10, transform=ax.transAxes)
 
-    #Get a list of the values of regression for each hour.
-    regrline_values = [regression_info[0] * i + regression_info[1] for i in range(0, len(data_parsed))]  
-    plt.plot(regrline_values, c=colors)
+    #set line colors and get the y values for each line
+    regr_colors = (1,0,0)
+    regrline_values = [regression_info[0] * i + regression_info[1] for i in range(len(data_parsed))]
 
+    #plot lines
+    plt.plot(regrline_values, c=regr_colors, linewidth=2)
+
+    #if using polynomials as well, use a legend and cycling colors, then add the polynomials using numpy library
+    add_polynomial = True
+    if (add_polynomial):
+        min = 1
+        max = 15
+        step = 2
+        cm = plt.get_cmap('gist_rainbow')
+        ax.set_prop_cycle(color=[cm(1.*i/15) for i in range(15)])
+        legend_list = [str(i) + " degree polynomial" for i in range(min, max, step)]
+        legend_list.insert(0, "Regression line")
+
+        #plot lines
+        for i in range(min, max, step):
+            polyfit_info = np.poly1d(np.polyfit(np.array(hours), np.array(sales), i))
+            polyfit_values = polyfit_info(hours)
+            ax.plot(hours, polyfit_values, linewidth=1)
+        
+        #must be after lines are plotted
+        ax.legend(legend_list)
+        
+    #show the graph
     plt.show()
 
 """
-This function gets the slope and intercept for the regression line
-using the least-squares method.
+Get the slope and intercept for the least-squares regression.
 """
 def create_regression():
-    #Get numbers for least-squares method.
     sum_x = sum(hours)
     sum_y = sum(sales)
     sum_xy = sum([hours[i] * sales[i] for i in range(len(hours))])
