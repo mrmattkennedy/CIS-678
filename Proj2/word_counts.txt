@@ -1,4 +1,4 @@
-atheism
+atheism -1
 atheism 781
 alt 89
 faq 66
@@ -10792,7 +10792,7 @@ doublespeak 1
 theodore 1
 kkkaldis 1
 cozy 1
-graphics
+graphics -1
 graphics 1161
 call 44
 for 1576
@@ -21918,7 +21918,7 @@ rycharde 1
 hawkes 1
 festival 1
 edinburgh 1
-mswindows
+mswindows -1
 mswindows 572
 re 377
 is 1461
@@ -29875,7 +29875,7 @@ leono 1
 bladerunner 1
 logs 1
 resolve 1
-pc
+pc -1
 pc 849
 wanted 30
 bus 316
@@ -38849,7 +38849,7 @@ rephrased 1
 warnings 1
 txm 1
 promovie 1
-mac
+mac -1
 mac 1090
 re 389
 nutek 10
@@ -47078,7 +47078,7 @@ pam 1
 mullen 1
 dbug 1
 infoline 1
-windows
+windows -1
 xwindows 611
 th 44
 international 43
@@ -58449,7 +58449,7 @@ connecting 1
 aspects 1
 roll 1
 mitel 1
-forsale
+forsale -1
 forsale 672
 motorcycle 3
 wanted 66
@@ -67776,7 +67776,7 @@ nw 1
 metro 1
 prinaoa 1
 yalevm 1
-autos
+autos -1
 autos 683
 re 612
 saturn 91
@@ -77945,7 +77945,7 @@ severities 1
 informative 1
 hatchbacks 1
 fare 1
-motorcycles
+motorcycles -1
 motorcycles 697
 re 660
 lexan 3
@@ -88206,7 +88206,7 @@ relied 1
 sussed 1
 peeve 1
 indicator 1
-baseball
+baseball -1
 baseball 926
 spring 40
 records 6
@@ -96867,7 +96867,7 @@ snows 1
 homewood 1
 disk 4
 ewb 2
-hockey
+hockey -1
 hockey 1238
 superstars 8
 and 2487
@@ -107354,7 +107354,7 @@ character 1
 scare 1
 cept 1
 thi 1
-cryptology
+cryptology -1
 cryptology 645
 ripem 174
 frequently 22
@@ -120036,7 +120036,7 @@ nicely 1
 infomation 1
 toasted 1
 patsy 1
-electronics
+electronics -1
 electronics 690
 re 491
 help 142
@@ -129963,7 +129963,7 @@ rotate 1
 graphic 1
 downloadable 1
 fonts 1
-medicine
+medicine -1
 medicine 729
 info 87
 needed 23
@@ -144265,7 +144265,7 @@ drying 1
 blow 1
 drier 1
 bathe 1
-space
+space -1
 space 1914
 re 561
 gravity 58
@@ -157824,7 +157824,7 @@ charity 1
 deposits 1
 sstick 1
 zurbrin 1
-christianity
+christianity -1
 christianity 821
 re 598
 sex 47
@@ -170506,7 +170506,7 @@ brewmaster 1
 tenure 1
 revolutionary 1
 eliminated 1
-guns
+guns -1
 guns 1008
 re 705
 gun 975
@@ -182536,7 +182536,7 @@ disengenuous 1
 distinguished 1
 gay 1
 surfeit 1
-mideastpolitics
+mideastpolitics -1
 mideastpolitics 564
 re 650
 islam 47
@@ -197488,7 +197488,7 @@ demeaning 1
 bunk 1
 rosenbergs 1
 convoluted 1
-politics
+politics -1
 politics 508
 re 839
 media 54
@@ -209941,7 +209941,7 @@ lieu 1
 prescient 1
 displayed 1
 stickers 1
-religion
+religion -1
 religion 492
 re 424
 and 2831
