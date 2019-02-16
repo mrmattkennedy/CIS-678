@@ -2,6 +2,7 @@
 import time
 from itertools import chain
 from operator import itemgetter
+import time
 from math import log
 
 
@@ -157,12 +158,13 @@ class doc_classifier:
     Performs the classifications
     """
     def classify(self):
-        total = 1
+        total = 0
         totalRight = 0
-
+        start_time = time.time()
+        times = []
+        times_file = open("times.data", "w")
         #loops
         for document in self.test_documents:
-            print(str(total) + "/" + str(len(self.test_documents)) + ", " + str(round(totalRight/total, 2)))
             document_words = document.split()
             correct_type = document_words[0]
             all_word_probabilities = []
@@ -200,7 +202,13 @@ class doc_classifier:
             total+=1
             if self.totals_list[classifications.index(max(classifications))][0] == correct_type:
                 totalRight+=1
-                    
+
+            end_time = time.time()
+            print(str(total) + "/" + str(len(self.test_documents)) + ", " + str(round(totalRight/total, 2)))       
+            times_file.write(str(round(totalRight/total, 2)) + " " + str(end_time - start_time) + "\n")
+            
+        times_file.close()
+        
             
 
 classifier = doc_classifier()
