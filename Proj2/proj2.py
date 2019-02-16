@@ -15,6 +15,15 @@ words - total number of words
 class_probability - the probability for a document type
 word_category_probabilities - probability for a word in a category
 test_documents - the test data
+
+
+Current issues:
+    slow. Uses several nested for loops due to structure of propabilities list.
+    Solution: split each document type into 2 lists, have the word in one and
+    the corresponding in the other, use the in operator. Much faster.
+
+    poor classification rate.
+    Solution: look into further investigation
 """
 class doc_classifier:
     def __init__(self):
@@ -64,14 +73,17 @@ class doc_classifier:
             print(self.totals_list[topic][0])
             for i in range(start_index, start_index + self.totals_list[topic][1]):
                 for word in words[i]:
-                    if len(word) > 2 and word != "the" and word != "and":
+                    if (len(word) > 2 and word != "the" and word != "and" and
+                        word != "you" and word != "she" and word != "him" and word != "her" and
+                        word != "his" and word != "hers" and word != "yours" and word != "they" and
+                        word != "their" and word != "them" and word != "yours" and word != "mine"):
                         if len(word_count) == 0:
                             temp_list = [word, 1]
                             word_count.append(temp_list)
                             continue
                         else:
                             if any(word in current_word for current_word in word_count):
-                                index = [i for i, lst in enumerate(word_count) if word in lst][0] 
+                                index = [i for i, lst in enumerate(word_count) if word in lst][0]
                                 word_count[index][1] = word_count[index][1] + 1
                                 continue
 
@@ -79,7 +91,7 @@ class doc_classifier:
                             word_count.append(temp_list)
 
             start_index = start_index + self.totals_list[topic][1]
-           
+
             for word in word_count:
                 word_count_file.write(str(word[0]) + " " + str(word[1]) + "\n")
 
@@ -95,27 +107,27 @@ class doc_classifier:
         self.words = [word.split() for word in training_data.readlines()]
         self.words = [[word[0], int(word[1])] for word in self.words]
         training_data.close()
-        
+
     """
     Gets the necessary probabilities for words in a given document type.
     """
-    def classify_words(self):
+    def get_probabilities(self):
         self.class_probability = [type[1]/self.total for type in self.totals_list]
         start_index = 0
         topic_words = []
         temp_list = []
         word = 0
 
-        #Gets the words by category 
+        #Gets the words by category
         while word < len(self.words):
             if self.words[word][1] == -1 and len(temp_list) > 0:
                 topic_words.append(temp_list.copy())
                 temp_list.clear()
-                
+
             temp_list.append(self.words[word])
             word+=1
         topic_words.append(temp_list.copy())
-        
+
         total_words_per_category = [len(category) - 1 for category in topic_words]
         temp_list.clear()
         #Total number of words, or total vocabulary
@@ -132,7 +144,7 @@ class doc_classifier:
         for topic in topic_words:
             temp_list.clear()
             temp_list.append(topic[0])
-            
+
             for word in topic[1:]:
                 temp_probability = [word[0], (word[1])/(total_words_per_category[current_topic_index] + vocabulary)]
                 #print(temp_probability)
@@ -156,9 +168,10 @@ class doc_classifier:
 
     """
     Performs the classifications
+    Slow version: uses nested for loops. Takes about 6 hours to classify all test documents.
     """
-    def classify(self):
-        total = 0
+    def classify_slow(self):
+        total = 1
         totalRight = 0
         start_time = time.time()
         times = []
@@ -203,17 +216,63 @@ class doc_classifier:
             if self.totals_list[classifications.index(max(classifications))][0] == correct_type:
                 totalRight+=1
 
-            end_time = time.time()
-            print(str(total) + "/" + str(len(self.test_documents)) + ", " + str(round(totalRight/total, 2)))       
-            times_file.write(str(round(totalRight/total, 2)) + " " + str(end_time - start_time) + "\n")
-            
-        times_file.close()
-        
-            
+    def classify_fast(self):
+        total = 1
+        totalRight = 0
+        #list of lists, used to hold all the words
+        doc_type_words = []
+        #list of lists, used to hold probabilities
+        doc_type_words_probs = []
+
+
+        for category in self.word_category_probabilities:
+            temp_word_list = []
+            temp_prob_list = []
+            for word_and_prob in category:
+                temp_word_list.append(word_and_prob[0])
+                temp_prob_list.append(word_and_prob[1])
+
+            doc_type_words.append(temp_word_list.copy())
+            doc_type_words_probs.append(temp_prob_list.copy())
+
+        #loops
+        for document in self.test_documents:
+            print(str(total) + "/" + str(len(self.test_documents)) + ", " + str(round(totalRight/total, 2)))
+            document_words = document.split()
+            correct_type = document_words[0]
+            all_word_probabilities = []
+            classifications = [1 for i in range(self.total_types)]
+
+            #for each word in document, check if it is in the word_category_probabilities list. If so, get the probability.
+            for word in document_words:
+                word_probability_per_category = []
+                for category in range(len(doc_type_words)):
+                    if word in doc_type_words[category]:
+                        index = doc_type_words[category].index(word)
+                        word_probability_per_category.append(doc_type_words_probs[category][index])
+                    else:
+                        word_probability_per_category.append(-1)
+                all_word_probabilities.append(word_probability_per_category.copy())
+
+            #multiple logs together as well as class probability
+            for word_probability in all_word_probabilities:
+                for category in range(len(word_probability)):
+                    if word_probability[category] == -1:
+                        continue
+                    classifications[category] *= log(word_probability[category])
+
+            for doc_type in range(len(classifications)):
+                classifications[doc_type] *= self.class_probability[doc_type]
+
+            #print(classifications)
+            #print(self.totals_list[classifications.index(max(classifications))][0] + ", " + correct_type)
+            total+=1
+            if self.totals_list[classifications.index(max(classifications))][0] == correct_type:
+                totalRight+=1
 
 classifier = doc_classifier()
-#classifier.save_word_counts("word_counts_noarticles.txt")
-classifier.load_word_counts("word_counts_noarticles.txt")
-classifier.classify_words()
-classifier.load_test_data()
-classifier.classify()
+classifier.save_word_counts("word_counts_noarticles_pronouns.txt")
+#classifier.load_word_counts("word_counts_noarticles.txt")
+#classifier.get_probabilities()
+#classifier.load_test_data()
+#classifier.classify_fast()
