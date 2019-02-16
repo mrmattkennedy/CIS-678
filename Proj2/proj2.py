@@ -216,28 +216,29 @@ class doc_classifier:
             if self.totals_list[classifications.index(max(classifications))][0] == correct_type:
                 totalRight+=1
 
-    def classify_fast(self):
-        total = 1
+    def classify_fast(self, filename):
+        total = 0
         totalRight = 0
         #list of lists, used to hold all the words
         doc_type_words = []
         #list of lists, used to hold probabilities
         doc_type_words_probs = []
-
+        times_file = open(filename, "w")
+        startTime = time.time()
 
         for category in self.word_category_probabilities:
             temp_word_list = []
             temp_prob_list = []
             for word_and_prob in category:
-                temp_word_list.append(word_and_prob[0])
-                temp_prob_list.append(word_and_prob[1])
-
+                if (word_and_prob[1] != -1):
+                    temp_word_list.append(word_and_prob[0])
+                    temp_prob_list.append(word_and_prob[1])
             doc_type_words.append(temp_word_list.copy())
             doc_type_words_probs.append(temp_prob_list.copy())
+        #print(doc_type_words[0])
 
         #loops
         for document in self.test_documents:
-            print(str(total) + "/" + str(len(self.test_documents)) + ", " + str(round(totalRight/total, 2)))
             document_words = document.split()
             correct_type = document_words[0]
             all_word_probabilities = []
@@ -245,6 +246,7 @@ class doc_classifier:
 
             #for each word in document, check if it is in the word_category_probabilities list. If so, get the probability.
             for word in document_words:
+                #print(word)
                 word_probability_per_category = []
                 for category in range(len(doc_type_words)):
                     if word in doc_type_words[category]:
@@ -252,8 +254,11 @@ class doc_classifier:
                         word_probability_per_category.append(doc_type_words_probs[category][index])
                     else:
                         word_probability_per_category.append(-1)
+                #print("probs are: " + str(word_probability_per_category))
                 all_word_probabilities.append(word_probability_per_category.copy())
 
+            #for category_prob in all_word_probabilities:
+                #print(category_prob)
             #multiple logs together as well as class probability
             for word_probability in all_word_probabilities:
                 for category in range(len(word_probability)):
@@ -262,7 +267,7 @@ class doc_classifier:
                     classifications[category] *= log(word_probability[category])
 
             for doc_type in range(len(classifications)):
-                classifications[doc_type] *= self.class_probability[doc_type]
+                classifications[doc_type] += log(self.class_probability[doc_type])
 
             #print(classifications)
             #print(self.totals_list[classifications.index(max(classifications))][0] + ", " + correct_type)
@@ -270,9 +275,15 @@ class doc_classifier:
             if self.totals_list[classifications.index(max(classifications))][0] == correct_type:
                 totalRight+=1
 
+            print(str(total) + "/" + str(len(self.test_documents)) + ", " + str(round(totalRight/total, 2)))
+            endTime = time.time()
+            times_file.write(str(round(totalRight/total, 2)) + " " + str(endTime - startTime) + "\n")
+            
+        times_file.close()
+
 classifier = doc_classifier()
-classifier.save_word_counts("word_counts_noarticles_pronouns.txt")
-#classifier.load_word_counts("word_counts_noarticles.txt")
-#classifier.get_probabilities()
-#classifier.load_test_data()
-#classifier.classify_fast()
+#classifier.save_word_counts("word_counts_noarticles_pronouns.txt")
+classifier.load_word_counts("word_counts_noarticles_pronouns.txt")
+classifier.get_probabilities()
+classifier.load_test_data()
+classifier.classify_fast("times_noarticles_pronouns.data")
