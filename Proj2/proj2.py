@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 import time
+from nltk.corpus import wordnet as wn
+from nltk import PorterStemmer
 from itertools import chain
 from operator import itemgetter
-import time
 from math import log
 
 
@@ -62,6 +63,7 @@ class doc_classifier:
         training_data = open("forumTraining.data", "r")
         documents = [line for line in training_data.readlines()]
         words = [document.split() for document in documents]
+        ps = PorterStemmer()
 
         word_count = []
         word_count_file = open(file_name, "w")
@@ -73,10 +75,11 @@ class doc_classifier:
             print(self.totals_list[topic][0])
             for i in range(start_index, start_index + self.totals_list[topic][1]):
                 for word in words[i]:
-                    if (len(word) > 2 and word != "the" and word != "and" and
-                        word != "you" and word != "she" and word != "him" and word != "her" and
-                        word != "his" and word != "hers" and word != "yours" and word != "they" and
-                        word != "their" and word != "them" and word != "yours" and word != "mine"):
+                    if (len(word) > 2 and word != "the" and word != "and"):
+                        descriptions = wn.synsets(word)
+                        if len(descriptions) > 0 and descriptions[0].pos() == "a" or len(descriptions) == 0:
+                            continue
+                       # word = ps.stem(word)
                         if len(word_count) == 0:
                             temp_list = [word, 1]
                             word_count.append(temp_list)
@@ -93,7 +96,8 @@ class doc_classifier:
             start_index = start_index + self.totals_list[topic][1]
 
             for word in word_count:
-                word_count_file.write(str(word[0]) + " " + str(word[1]) + "\n")
+                if (word[1] is not 1):
+                   word_count_file.write(str(word[0]) + " " + str(word[1]) + "\n")
 
         print(len(word_count))
         word_count_file.close()
@@ -146,7 +150,7 @@ class doc_classifier:
             temp_list.append(topic[0])
 
             for word in topic[1:]:
-                temp_probability = [word[0], (word[1])/(total_words_per_category[current_topic_index] + vocabulary)]
+                temp_probability = [word[0], (word[1] + 1)/(total_words_per_category[current_topic_index] + vocabulary)]
                 #print(temp_probability)
                 temp_list.append(temp_probability)
 
@@ -225,6 +229,7 @@ class doc_classifier:
         doc_type_words_probs = []
         times_file = open(filename, "w")
         startTime = time.time()
+        ps = PorterStemmer()
 
         for category in self.word_category_probabilities:
             temp_word_list = []
@@ -246,16 +251,22 @@ class doc_classifier:
 
             #for each word in document, check if it is in the word_category_probabilities list. If so, get the probability.
             for word in document_words:
-                #print(word)
-                word_probability_per_category = []
-                for category in range(len(doc_type_words)):
-                    if word in doc_type_words[category]:
-                        index = doc_type_words[category].index(word)
-                        word_probability_per_category.append(doc_type_words_probs[category][index])
-                    else:
-                        word_probability_per_category.append(-1)
-                #print("probs are: " + str(word_probability_per_category))
-                all_word_probabilities.append(word_probability_per_category.copy())
+                if len(word) > 2 and word != "the" and word != "and":
+                    #print(word)
+        #            word = ps.stem(word)
+                    word_probability_per_category = []
+
+                    descriptions = wn.synsets(word)
+                    if len(descriptions) > 0 and descriptions[0].pos() == "a" or len(descriptions) == 0:
+                        continue
+                    for category in range(len(doc_type_words)):
+                        if word in doc_type_words[category]:
+                            index = doc_type_words[category].index(word)
+                            word_probability_per_category.append(doc_type_words_probs[category][index])
+                        else:
+                            word_probability_per_category.append(-1)
+                    #print("probs are: " + str(word_probability_per_category))
+                    all_word_probabilities.append(word_probability_per_category.copy())
 
             #for category_prob in all_word_probabilities:
                 #print(category_prob)
@@ -264,16 +275,20 @@ class doc_classifier:
                 for category in range(len(word_probability)):
                     if word_probability[category] == -1:
                         continue
-                    classifications[category] *= log(word_probability[category])
+                    classifications[category] *= abs(log(word_probability[category]))
+
 
             for doc_type in range(len(classifications)):
-                classifications[doc_type] += log(self.class_probability[doc_type])
-
+                classifications[doc_type] *= abs(log(self.class_probability[doc_type]))
+            
+            #print(classifications)
             #print(classifications)
             #print(self.totals_list[classifications.index(max(classifications))][0] + ", " + correct_type)
             total+=1
             if self.totals_list[classifications.index(max(classifications))][0] == correct_type:
                 totalRight+=1
+#            else:
+ #               print(classifications)
 
             print(str(total) + "/" + str(len(self.test_documents)) + ", " + str(round(totalRight/total, 2)))
             endTime = time.time()
@@ -282,8 +297,8 @@ class doc_classifier:
         times_file.close()
 
 classifier = doc_classifier()
-#classifier.save_word_counts("word_counts_noarticles_pronouns.txt")
-classifier.load_word_counts("word_counts_noarticles_pronouns.txt")
+classifier.save_word_counts("word_counts_nostemmer_noadj_nodescr.txt")
+classifier.load_word_counts("word_counts_nostemmer_noadj_nodescr.txt")
 classifier.get_probabilities()
 classifier.load_test_data()
-classifier.classify_fast("times_noarticles_pronouns.data")
+classifier.classify_fast("times_iter7.data")

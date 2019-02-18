@@ -1,0 +1,6 @@
+iter1: slow speed, poor result
+iter2: faster speed, poor result
+iter3: removed words used once, good result (changed alg)
+iter4: stemmer, no adjectives, poor result
+iter5: no stemmer, no adjectives, ok result
+iter6: no stemmer, no adjectives, all use cases (1 use words)
