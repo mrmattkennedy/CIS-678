@@ -1,0 +1,44 @@
+['vhigh', 'high', 'medium', 'low']
+[[254, 55, 0, 0], [239, 81, 0, 0], [199, 77, 17, 16], [183, 65, 21, 29]]
+
+['vhigh', 'high', 'medium', 'low']
+[[252, 52, 0, 0], [233, 71, 0, 10], [198, 86, 9, 18], [192, 69, 29, 17]]
+
+['2', '3', '4', '5']
+[[231, 54, 10, 6], [220, 70, 8, 12], [211, 73, 12, 13], [213, 81, 8, 14]]
+
+['2', '4', '6']
+[[415, 0, 0, 0], [229, 140, 18, 23], [231, 138, 20, 22]]
+
+['small', 'medium', 'big']
+[[322, 76, 13, 0], [296, 101, 9, 17], [257, 101, 16, 28]]
+
+['low', 'medium', 'high']
+[[429, 0, 0, 0], [245, 131, 21, 0], [201, 147, 17, 45]]
+
+attr = find the attribute
+attr_index = which list?
+
+['cost', '4', 'vhigh', 'high', 'medium', 'low']
+['maintenance', '4', 'vhigh', 'high', 'medium', 'low']
+['doors', '4', '2', '3', '4', '5']
+['persons', '3', '2', '4', '6']
+['trunk', '3', 'small', 'medium', 'big']
+['safety', '3', 'low', 'medium', 'high']
+
+at each level, 
+	get highest gain, then call the method recursively.
+	create new leaf object, pass in:
+		training set of all that are of that type (i.e. all sunny)
+		all possible classes of the attribute (strong, rainy, etc)
+		parent
+		if 1/0, return
+	need to get set entropy - for given attr, such as sunny and rainy, that are in class a vs b vs c vs ...\
+	identify values that meet conditions of parent, use above to get entropy for a class
+	each step remove what the parent is - so each side can have repeating stuff
+
+need to loop through each possible value for an attribute, and get those examples as a leaf
+
+forecast:
+	sunny -> wind is next highest
+	rainy -> water or airtemp
