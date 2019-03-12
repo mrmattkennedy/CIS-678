@@ -6,27 +6,27 @@ from collections import deque
 training_set = []
 
 class Node:
-    def __init__(self, attribute, value = None, parent = None, children = []):
+    def __init__(self, attribute, value = None, parent = None):
         self.parent = parent
         self.value = value
         self.attribute = attribute
-        self.children = children
+        self.children = []
         
     def add_child(self, child):
         self.children.append(child)
-    """
+    
     def __str__(self, level=0):
-        ret = "\t"*level+repr(self.attribute)+"\n"
+        ret = "\t"*level+repr(self.value)+"\n"+"\t"*level+repr(self.attribute)+"\n"
         for child in self.children:
             ret += child.__str__(level+1)
         return ret
     def __repr__(self):
         return '<tree node representation>'
-    """
+    
     
 class decision_tree:
-    def __init__(self):
-        with open("fishing.data", "r") as file:
+    def __init__(self, filename):
+        with open(filename, "r") as file:
             self.training_set = deque(file.readlines())
             
         self.classes = self.training_set[1].rstrip().split(",")
@@ -48,8 +48,6 @@ class decision_tree:
         attribute_totals_per_class = deque()
         for possible_class in range(len(self.classes)):
             class_probabilities.append(0)
-        print(parent.attribute)
-        print(len(parent.children))
         #get all attributes and count totals for given class
         for possible_attribute in range(len(attributes)):
             tmp = []
@@ -72,8 +70,6 @@ class decision_tree:
                 
         count = 0
         total = sum(class_probabilities)
-        if total is 0:
-            return
         class_probabilities = [float(prob/total) for prob in class_probabilities]
 
         if class_entropy is None:
@@ -85,7 +81,6 @@ class decision_tree:
         attribute_entropies = []
         total_entropies = []
         gains = []
-        #print(attribute_totals_per_class)
         for attr in range(len(attributes)):
             attribute_entropies.clear()
             for value in range(len(attributes[attr]) - 2): #offset for name and # values
@@ -107,19 +102,22 @@ class decision_tree:
 
         max_attribute = attributes[gains.index(max(gains))]
         max_attribute_index = attributes.index(max_attribute)
-        #print(max_attribute)
-        current = Node(max_attribute, branch_value, parent)
-        parent.add_child(current)
+        current = Node(None)
         new_attributes = attributes.copy()
         new_attributes.remove(max_attribute)
-        #print(gains)
-        #print(parent.attribute)
-        for value in range(2, len(attributes[attributes.index(max_attribute)])):
-            if total_entropies[max_attribute_index][value - 2] == 0:
+        matching_values.append(len(training_set[0].split(",")) - 1)
+        
+        for value in range(2, len(attributes[attributes.index(max_attribute)])): #offset for attr and # values
+            if total_entropies[max_attribute_index][value - 2] == 0.0:
                 for item in range(len(training_set)):
                     current_item = training_set[item].rstrip().split(',')
+                    current_item = [current_item[i] for i in matching_values]
                     if max_attribute[value] == current_item[max_attribute_index]:
+                        if current.attribute is None:
+                            current = Node(max_attribute, branch_value, parent)
+                            parent.add_child(current)
                         end = Node(current_item[len(current_item)-1], max_attribute[value], current)
+                            #print(end.attribute)
                         current.add_child(end)
                         break
             else:      
@@ -129,16 +127,51 @@ class decision_tree:
                     if max_attribute[value] == current_item[max_attribute_index]:
                         new_training_set.append(training_set[item].rstrip())
                 #create_leaf(self, branch_value = None, training_set = None, classes = None, class_entropy = None, new_attributes = None, parent = None):
-                self.create_leaf(max_attribute[value], new_training_set, classes, total_entropies[max_attribute_index][value - 2], new_attributes, parent=current)
-                
+                if len(new_training_set) > 0:
+                    if current.attribute is None:
+                        current = Node(max_attribute, branch_value, parent)
+                        parent.add_child(current)
+                    self.create_leaf(max_attribute[value], new_training_set, classes, total_entropies[max_attribute_index][value - 2], new_attributes, parent=current)
+                else:
+                    continue
+
+    def classify_set(self, filename, decision_tree):
+        with open(filename, "r") as file:
+            test_set = deque(file.readlines())
+
+        correct_classifications = 0
+        total_classifications = 0
+        attribute_labels = [attr[0] for attr in self.attributes]
+        #print(attribute_labels)
+        for item in range(int(test_set[2]) + 4, len(test_set)):
+            current_item = test_set[item].rstrip().split(',')
+            current_node = decision_tree
+
+            if total_classifications is 66:
+                print (current_item)
+            while current_node.attribute not in self.classes:
+                attribute_index = attribute_labels.index(current_node.attribute[0])
+                attribute_value = current_item[attribute_index]
+                if total_classifications is 66:
+                    print(str(current_node.attribute[0]) + " : " + str(current_node.value))
+                for child in current_node.children:
+                    if child.value == attribute_value:
+                        current_node = child
+                        break
+            total_classifications += 1
+            if current_node.attribute == current_item[-1]:
+                correct_classifications += 1
+
+            #print(total_classifications)
+        
 
 startTime = time.time()    
 root = Node(None)
-dt = decision_tree()
+dt = decision_tree("car_training.data")
 dt.create_leaf(parent=root)
+
 print(str(time.time() - startTime))
-temp = root
-#for child in root.children:
-    #print(child.attribute)
-    
-print(len(root.children))
+root = root.children[0]
+print(root)
+dt.classify_set("car_test.data", root)
+
