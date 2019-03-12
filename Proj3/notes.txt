@@ -37,8 +37,7 @@ at each level,
 	identify values that meet conditions of parent, use above to get entropy for a class
 	each step remove what the parent is - so each side can have repeating stuff
 
-need to loop through each possible value for an attribute, and get those examples as a leaf
+get each value of max gain attribute, for each value, get next max gain, etc
 
-forecast:
-	sunny -> wind is next highest
-	rainy -> water or airtemp
+every iteration - get in attribute, in class, entropy of that
+	i.e. all sunny wind ones that are yes vs all sunny wind ones that are no
