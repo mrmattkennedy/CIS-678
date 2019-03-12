@@ -16,7 +16,7 @@ class Node:
         self.children.append(child)
     
     def __str__(self, level=0):
-        ret = "\t"*level+repr(self.value)+"\n"+"\t"*level+repr(self.attribute)+"\n"
+        ret = "\t"*level+"Branch value: " + repr(self.value)+"\n"+"\t"*level+repr(self.attribute)+"\n"
         for child in self.children:
             ret += child.__str__(level+1)
         return ret
@@ -127,10 +127,10 @@ class decision_tree:
                     if max_attribute[value] == current_item[max_attribute_index]:
                         new_training_set.append(training_set[item].rstrip())
                 #create_leaf(self, branch_value = None, training_set = None, classes = None, class_entropy = None, new_attributes = None, parent = None):
+                if current.attribute is None:
+                    current = Node(max_attribute, branch_value, parent)
+                    parent.add_child(current)
                 if len(new_training_set) > 0:
-                    if current.attribute is None:
-                        current = Node(max_attribute, branch_value, parent)
-                        parent.add_child(current)
                     self.create_leaf(max_attribute[value], new_training_set, classes, total_entropies[max_attribute_index][value - 2], new_attributes, parent=current)
                 else:
                     continue
@@ -170,8 +170,8 @@ root = Node(None)
 dt = decision_tree("car_training.data")
 dt.create_leaf(parent=root)
 
-print(str(time.time() - startTime))
+#print(str(time.time() - startTime))
 root = root.children[0]
 print(root)
-dt.classify_set("car_test.data", root)
+#dt.classify_set("car_test.data", root)
 
