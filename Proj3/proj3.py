@@ -11,12 +11,16 @@ class Node:
         self.value = value
         self.attribute = attribute
         self.children = []
+        self.count = 0
         
     def add_child(self, child):
         self.children.append(child)
+
+    def add_hit(self):
+        self.count += 1
     
     def __str__(self, level=0):
-        ret = "\t"*level+"Branch value: " + repr(self.value)+"\n"+"\t"*level+repr(self.attribute)+"\n"
+        ret = "\t"*level+"Branch value: " + repr(self.value)+ "\t" +repr(self.attribute)+"\n"
         for child in self.children:
             ret += child.__str__(level+1)
         return ret
@@ -142,27 +146,61 @@ class decision_tree:
         correct_classifications = 0
         total_classifications = 0
         attribute_labels = [attr[0] for attr in self.attributes]
+        avoid_nodes = []
         #print(attribute_labels)
+        #try:
         for item in range(int(test_set[2]) + 4, len(test_set)):
             current_item = test_set[item].rstrip().split(',')
             current_node = decision_tree
+            avoid_nodes = []
+            
+            #if total_classifications is 161:
+             #   print("Here")
+            while current_node.attribute not in self.classes:   
+                attribute_index = attribute_labels.index(current_node.attribute[0]) #get the attribute at the current node
+                attribute_value = current_item[attribute_index] #find the value of the attribute in the current item
+                found = False
 
-            if total_classifications is 66:
-                print (current_item)
-            while current_node.attribute not in self.classes:
-                attribute_index = attribute_labels.index(current_node.attribute[0])
-                attribute_value = current_item[attribute_index]
-                if total_classifications is 66:
-                    print(str(current_node.attribute[0]) + " : " + str(current_node.value))
+                #check for children to continue classifying, follow branch
                 for child in current_node.children:
+                    if child in avoid_nodes:
+                        continue
                     if child.value == attribute_value:
                         current_node = child
+                        child.add_hit()
+                        found = True
                         break
+
+                #no child found to follow, get highest probability
+                if not found:
+                    highest_prob = -1
+                    highest_prob_child = None
+
+                    for child in current_node.children:
+                        if child in avoid_nodes:
+                            continue
+                        if child.count > highest_prob:
+                            highest_prob_child = child
+                            highest_prob = child.count
+
+                    #found a child that isn't already checked
+                    if highest_prob != -1:
+                        current_node = highest_prob_child
+                        child.add_hit()
+                    #no more children to check
+                    else:
+                        avoid_nodes.append(current_node)
+                        current_node = current_node.parent
+                        continue
+                    
             total_classifications += 1
+            
             if current_node.attribute == current_item[-1]:
                 correct_classifications += 1
 
-            #print(total_classifications)
+        print(total_classifications)
+        print(correct_classifications)
+        print(float(correct_classifications/total_classifications))
         
 
 startTime = time.time()    
@@ -172,6 +210,6 @@ dt.create_leaf(parent=root)
 
 #print(str(time.time() - startTime))
 root = root.children[0]
-print(root)
-#dt.classify_set("car_test.data", root)
+#print(root)
+dt.classify_set("car_test.data", root)
 
