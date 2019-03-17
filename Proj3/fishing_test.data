@@ -2,9 +2,9 @@
 Yes,No
 4
 Wind,2,Strong,Weak
-Air,2,Warm,Cool
 Water,3,Warm,Moderate,Cold
+Air,2,Warm,Cool
 Forecast,3,Sunny,Cloudy,Rainy
 2
 Strong,Cold,Warm,Sunny,Yes
-Light,Warm,Cold,Rainy,Yes
+Light,Warm,Cool,Rainy,No

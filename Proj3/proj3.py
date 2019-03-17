@@ -160,9 +160,9 @@ class decision_tree:
                 attribute_index = attribute_labels.index(current_node.attribute[0]) #get the attribute at the current node
                 attribute_value = current_item[attribute_index] #find the value of the attribute in the current item
                 found = False
-
                 #check for children to continue classifying, follow branch
                 for child in current_node.children:
+                    #print(child)
                     if child in avoid_nodes:
                         continue
                     if child.value == attribute_value:
@@ -210,6 +210,6 @@ dt.create_leaf(parent=root)
 
 #print(str(time.time() - startTime))
 root = root.children[0]
-#print(root)
+print(root)
 dt.classify_set("car_test.data", root)
 
