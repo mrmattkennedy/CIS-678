@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import math
 import random
 import time
@@ -25,11 +24,11 @@ class ANN:
         self.hidden_values = [0 for i in range(self.num_hidden)]
         self.outputs = [0 for i in range(self.num_outputs)]
         self.target = 1
-        self.learning_rate = 0.01
+        self.learning_rate = 0.001
         self.total_error = -999
 
     def feed_forward(self):
-        for data in range(500):
+        for data in range(len(self.training_set)):
             current_values = [float(i)/16 for i in self.training_set[data].split()[:-1]]
             current_values = [-1 if i == 0.0 else i for i in current_values]
 #            print(current_values)
@@ -43,7 +42,7 @@ class ANN:
                     self.outputs[weight] += self.hidden_output[val_hidden][weight] * self.hidden_values[val_hidden]
 
             self.back_propogate(current_values)
-            print(str(self.total_error - sum([0.5 * ((1 - i) ** 2) for i in self.outputs])))
+#            print(str(self.total_error - sum([0.5 * ((1 - i) ** 2) for i in self.outputs])))
             if self.total_error - sum([0.5 * ((1 - i) ** 2) for i in self.outputs]) == 0.0:
                 return
             self.total_error = sum([0.5 * ((1 - i) ** 2) for i in self.outputs])
@@ -68,9 +67,45 @@ class ANN:
                 #self.input_hidden[val_input][weight] -= self.learning_rate * hidden_errors[weight] * current_values[val_hidden]
                 self.input_hidden[val_input][weight] += (0.5 * self.learning_rate) * (current_values[val_input]) * (1+hidden_errors[weight]) * (1-hidden_errors[weight]) * (hidden_errors[weight] - self.target)
     def predict(self):
+#        """
+        file_to_open = open("weights.txt", "w")
+        for val_input in range(len(self.input_hidden)):
+            for weight in range(len(self.input_hidden[val_input])):
+                file_to_open.write(str(val_input) + "," + str(weight) + ": " + str(self.input_hidden[val_input][weight]) + "\n")
+ #       """
+        weight_file = open("values.txt", "w")
+
+        file_to_open.close()
+        for data in range(20):
+            current_values = [float(i)/16 for i in self.training_set[data].split()[:-1]]
+            current_values = [-1 if i == 0.0 else i for i in current_values]
+            #print(current_values)
+            self.hidden_values = [0 for i in range(self.num_hidden)]
+            self.outputs = [0 for i in range(self.num_outputs)]
+            weight_file.write("\n\n" + str(current_values) + "\n\n")
+            for val_input in range(len(self.input_hidden)):
+                for weight in range(len(self.input_hidden[val_input])):
+                    print(str(val_input) + "," + str(weight) + ": " + str(self.input_hidden[val_input][weight]))
+                    self.hidden_values[weight] += self.input_hidden[val_input][weight] * current_values[val_input]
+                    if math.isnan(self.hidden_values[weight]):
+                        weight_file.close()
+                        return
+                    weight_file.write(str(val_input) + "," + str(weight) + "\t" + str(self.input_hidden[val_input][weight]) + ":" + str(current_values[val_input]) + "\t" +str(self.hidden_values[weight]) + "\n")
+
+ 
+    #        self.hidden_values = [1/(1+math.exp(-i)) for i in self.hidden_values]
+            print(self.hidden_values[0])
+            for val_hidden in range(len(self.hidden_values)):
+                for weight in range(len(self.hidden_output[val_hidden])):
+                    self.outputs[weight] += self.hidden_output[val_hidden][weight] * self.hidden_values[val_hidden]
+
+            #self.back_propogate(current_values)
+            self.total_error = sum([0.5 * ((1 - i) ** 2) for i in self.outputs])
+            print(str(self.outputs.index(max(self.outputs)) + 1))
+
         return
 
 for _ in range(1):
     ann_ex = ANN("digits-training.data", "digits-test.data")
-
     ann_ex.feed_forward()
+    ann_ex.predict()
