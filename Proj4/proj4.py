@@ -17,7 +17,8 @@ class ANN:
         #self.hidden_output = [[random.uniform(-0.01, 0.01) for i in range(self.num_outputs)] for j in range(self.num_hidden)]
         self.input_hidden = [[1, 1, 0.5],[1,-1,2]]
         self.hidden_output = [[1, 1.5, -1]]
-        self.hidden_values = [0 for i in range(self.num_hidden)]
+        self.hidden_values = [0 for i in range(self.num_hidden - 1)]
+        self.hidden_values.insert(0, 1)
         self.outputs = [0 for i in range(self.num_outputs)]
         self.target = 0.5
         self.learning_rate = 0.001
@@ -27,27 +28,32 @@ class ANN:
         count = 0
         while True:
             count+=1
-            print(count)
-            for data in range(len(self.training_set)):
-                current_values = [float(i)/16 for i in self.training_set[data].split()[:-1]]
-                current_values = [-1 if i == 0.0 else i for i in current_values]
-    #            print(current_values)
-                for val_input in range(len(self.input_hidden)):
-                    for weight in range(len(self.input_hidden[val_input])):
-                        self.hidden_values[weight] += self.input_hidden[val_input][weight] * current_values[val_input]
-     
-                self.hidden_values = [1/(1+math.exp(-i)) for i in self.hidden_values]
-                print("Outputs:" + str(len(self.outputs)) + "\nHidden output:" + str(len(self.hidden_output)) + "\nHidden output[0]:" + str(len(self.hidden_output[0])) + "\nHidden values:" + str(len(self.hidden_values)))
-                for val_hidden in range(len(self.hidden_values)):
-                    for weight in range(len(self.hidden_output[val_hidden])):
-                        print(str(val_hidden) + "," + str(weight))
-                        self.outputs[val_hidden] += self.hidden_output[val_hidden][weight] * self.hidden_values[val_hidden]
-                self.outputs = [math.exp(i)/sum([math.exp(j) for j in self.outputs]) for i in self.outputs]
-    #            print(str(self.total_error - sum([0.5 * ((1 - i) ** 2) for i in self.outputs])))
-                if self.total_error - sum([0.5 * ((1 - i) ** 2) for i in self.outputs]) == 0.0:
-                    return
-                self.total_error = sum([0.5 * ((1 - i) ** 2) for i in self.outputs])
-                self.back_propogate(current_values)
+            #print(count)
+            #for data in range(len(self.training_set)):
+            #current_values = [float(i)/16 for i in self.training_set[data].split()[:-1]]
+            current_values = [int(i) for i in self.training_set[0].rstrip().split()[:-1]]
+            print(self.training_set)
+            #current_values = [-1 if i == 0.0 else i for i in current_values]
+#            print(current_values)
+            for val_input in range(len(self.input_hidden)):
+                for weight in range(len(self.input_hidden[val_input])):
+                    #print(val_input)
+                    print(str(self.input_hidden[val_input][weight]) + " x " + str(current_values[val_input]) + " = " + str(self.input_hidden[val_input][weight] * current_values[val_input]))
+                    self.hidden_values[val_input + 1] += self.input_hidden[val_input][weight] * current_values[weight]
+                    print(self.hidden_values)
+            self.hidden_values = [1/(1+math.exp(-i)) for i in self.hidden_values[1:]]
+            #print("Outputs:" + str(len(self.outputs)) + "\nHidden output:" + str(len(self.hidden_output)) + "\nHidden output[0]:" + str(len(self.hidden_output[0])) + "\nHidden values:" + str(len(self.hidden_values)))
+            for val_hidden in range(len(self.hidden_output)):
+                for weight in range(len(self.hidden_output[val_hidden])):
+                    #print(str(val_hidden) + "," + str(weight))
+                    self.outputs[val_hidden] += self.hidden_output[val_hidden][weight] * self.hidden_values[val_hidden]
+            self.outputs = [math.exp(i)/sum([math.exp(j) for j in self.outputs]) for i in self.outputs]
+#            print(str(self.total_error - sum([0.5 * ((1 - i) ** 2) for i in self.outputs])))
+            if self.total_error - sum([0.5 * ((1 - i) ** 2) for i in self.outputs]) == 0.0:
+                return
+            self.total_error = sum([0.5 * ((1 - i) ** 2) for i in self.outputs])
+            print(self.hidden_values)
+            self.back_propogate(current_values)
 
     def back_propogate(self, current_values):
         output_errors = [i*(1-i)*(self.target-i) for i in self.outputs]
