@@ -5,6 +5,9 @@ from collections import deque
 
 training_set = []
 
+"""
+Used to create the tree structure. Points to both parent and children.
+"""
 class Node:
     def __init__(self, attribute, value = None, parent = None):
         self.parent = parent
@@ -20,14 +23,16 @@ class Node:
         self.count += 1
     
     def __str__(self, level=0):
-        ret = "\t"*level+"Branch value: " + repr(self.value)+ "\t" +repr(self.attribute)+"\n"
+        ret = "\t"*level+repr(self.value)+"   "+repr(self.attribute)+"\n"
         for child in self.children:
             ret += child.__str__(level+1)
         return ret
     def __repr__(self):
         return '<tree node representation>'
     
-    
+"""
+Uses create_leaf function to recursively create Nodes to create a decision tree.
+"""
 class decision_tree:
     def __init__(self, filename):
         with open(filename, "r") as file:
@@ -197,10 +202,11 @@ class decision_tree:
             
             if current_node.attribute == current_item[-1]:
                 correct_classifications += 1
+            #print(str(current_item) + " : " + current_node.attribute)
 
         print(total_classifications)
         print(correct_classifications)
-        print(float(correct_classifications/total_classifications))
+        print(float((correct_classifications)/total_classifications))
         
 
 startTime = time.time()    
@@ -210,6 +216,7 @@ dt.create_leaf(parent=root)
 
 #print(str(time.time() - startTime))
 root = root.children[0]
+root.value = "Start"
 print(root)
 dt.classify_set("car_test.data", root)
 
